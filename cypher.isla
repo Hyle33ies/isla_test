@@ -1,80 +1,79 @@
 # Before any match clause, there should be at least one create clause.
-forall <match_clause> m1:
-  exists <create_clause> c1: before(c1, m1)
+forall <match_clause> match:
+  exists <create_clause> create: before(create, match)
 
 # Before matching a node with a specific label, 
 # the node with that label should have been created.
-forall <match_clause> m2:
-  exists <create_clause> c2: (
-    before(c2, m2) and 
-    m2.<pattern>.<node_pattern>.<label_opt>.<label> = c2.<pattern>.<node_pattern>.<label_opt>.<label>)
+forall <match_clause> match:
+  exists <create_clause> create: (
+    before(create, match) and 
+    match.<pattern>.<node_pattern>.<label_opt>.<label> = create.<pattern>.<node_pattern>.<label_opt>.<label>)
 
 # Before matching a node with a specific property, 
 # the node with that property should have been created.
-forall <match_clause> m3:
-  exists <create_clause> c3: (
-    before(c3, m3) and 
-    m3.<pattern>.<node_pattern>.<properties>.<property_list>.<property>.<key> = c3.<pattern>.<node_pattern>.<properties>.<property_list>.<property>.<key>)
+forall <match_clause> match:
+  exists <create_clause> create: (
+    before(create, match) and 
+    match.<pattern>.<node_pattern>.<properties>.<property_list>.<property>.<property_string> = create.<pattern>.<node_pattern>.<properties>.<property_list>.<property>.<property_string>)
 
 # Before matching a relationship with a specific type, 
 # the relationship with that type should have been created.
-forall <match_clause> m4:
-  exists <create_clause> c4: (
-    before(c4, m4) and 
-    m4.<pattern>.<relationship_pattern>.<type_opt>.<type> = c4.<pattern>.<relationship_pattern>.<type_opt>.<type>)
+forall <match_clause> match:
+  exists <create_clause> create: (
+    before(create, match) and 
+    match.<pattern>.<relationship_pattern>.<type> = create.<pattern>.<relationship_pattern>.<type>)
 
 # Before matching a relationship with a specific property, 
 # the relationship with that property should have been created.
-forall <match_clause> m5:
-  exists <create_clause> c5: (
-    before(c5, m5) and 
-    m5.<pattern>.<relationship_pattern>.<properties>.<property_list>.<property>.<key> = c5.<pattern>.<relationship_pattern>.<properties>.<property_list>.<property>.<key>)
+forall <match_clause> match:
+  exists <create_clause> create: (
+    before(create, match) and 
+    match.<pattern>.<relationship_pattern>.<properties>.<property_list>.<property>.<property_string> = create.<pattern>.<relationship_pattern>.<properties>.<property_list>.<property>.<property_string>)
 
 # Before using a variable in the return clause, 
 # the variable should have been declared.
-forall <return_clause> r1:
-  exists <create_clause> c6: (
-    before(c6, r1) and 
-    r1.<return_items>.<return_item>.<variable> = c6.<pattern>.<node_pattern>.<variable>)
+forall <return_clause> return:
+  exists <create_clause> crte: (
+    before(crte, return) and 
+    return.<return_items>.<return_item>.<node_variable> = crte.<pattern>.<node_pattern>.<node_variable>)
 
-forall <return_clause> r2:
-  exists <match_clause> m6: (
-    before(m6, r2) and 
-    r2.<return_items>.<return_item>.<variable> = m6.<pattern>.<node_pattern>.<variable>)
+forall <return_clause> return:
+  exists <match_clause> mth: (
+    before(mth, return) and 
+    return.<return_items>.<return_item>.<node_variable> = mth.<pattern>.<node_pattern>.<node_variable>)
 
 # Variables used in different match and create clauses should be unique to avoid ambiguity.
-forall <statement> s1, <statement> s2:
-  s1 != s2 implies (
-    s1.<match_clause>.<pattern>.<node_pattern>.<variable> != s2.<match_clause>.<pattern>.<node_pattern>.<variable>)
+forall <statement> stmt1, <statement> stmt2:
+  stmt1 != stmt2 implies (
+    stmt1.<match_clause>.<pattern>.<node_pattern>.<node_variable> != stmt2.<match_clause>.<pattern>.<node_pattern>.<node_variable>)
 
-forall <statement> s3, <statement> s4:
-  s3 != s4 implies (
-    s3.<create_clause>.<pattern>.<node_pattern>.<variable> != s4.<create_clause>.<pattern>.<node_pattern>.<variable>)
+forall <statement> stmt1, <statement> stmt2:
+  stmt1 != stmt2 implies (
+    stmt1.<create_clause>.<pattern>.<node_pattern>.<node_variable> != stmt2.<create_clause>.<pattern>.<node_pattern>.<node_variable>)
 
 # Before using a DELETE clause, the variables to be deleted should have been previously defined in a CREATE or MATCH clause.
-forall <delete_clause> d1:
-  forall d1.<delete_items>.<variable> v1:
-    exists <create_clause> c7: (
-      before(c7, d1) and 
-      v1 = c7.<pattern>.<node_pattern>.<variable>
-    )
+forall <delete_clause> delete:
+  forall delete.<delete_items>.<node_variable> var:
+    exists <statement> stmt: (
+      before(stmt, delete) and 
+       var = stmt.<create_clause>.<pattern>.<node_pattern>.<node_variable>)
 
 # Before using a SET clause, the variables to be set should have been previously defined in a CREATE or MATCH clause.
-forall <set_clause> s5:
-  forall s5.<set_items>.<set_item>.<variable> v2:
-    exists <create_clause> c8: (
-      before(c8, s5) and 
-      v2 = c8.<pattern>.<node_pattern>.<variable>
+forall <set_clause> set:
+  forall set.<set_items>.<set_item>.<node_variable> var:
+    exists <create_clause> crte: (
+      before(crte, set) and 
+      var = crte.<pattern>.<node_pattern>.<node_variable>
     )
 
 # Node names (variables) should not conflict with labels.
-forall <node_pattern> n1:
-  n1.<variable> != n1.<label_opt>.<label>
+forall <node_pattern> node:
+  node.<node_variable> != node.<label_opt>.<label>
 
 # Node names (variables) should not conflict with relationship names (types).
-forall <node_pattern> n2, <relationship_pattern> r3:
-  n2.<variable> != r3.<type>
+forall <node_pattern> node, <relationship_pattern> rel:
+  node.<node_variable> != rel.<type>
 
 # Relationship names (types) should not conflict with labels.
-forall <relationship_pattern> r4, <node_pattern> n3:
-  r4.<type> != n3.<label_opt>.<label>
+forall <relationship_pattern> rel, <node_pattern> node:
+  rel.<type> != node.<label_opt>.<label>
